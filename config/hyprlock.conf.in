@@ -1,0 +1,193 @@
+# HoloNight system fallback for hyprlock >= 0.9.6.
+# A user configuration at ~/.config/hypr/hyprlock.conf takes precedence.
+
+$surface = rgba(061126d9)
+$surfaceSoft = rgba(0a1730b8)
+$text = rgba(e8f2ffff)
+$muted = rgba(8fa9cfff)
+$blue = rgba(64b5ffff)
+$cyan = rgba(67e8f9ff)
+$violet = rgba(a78bffff)
+$red = rgba(ff5c7aff)
+
+general {
+    hide_cursor = true
+    ignore_empty_input = true
+    immediate_render = true
+}
+
+auth {
+    pam {
+        enabled = true
+    }
+}
+
+background {
+    monitor =
+    path = @HOLONIGHT_HYPRLOCK_DATA_DIR@/wallpaper.png
+    color = rgba(030816ff)
+    blur_passes = 2
+    blur_size = 4
+    brightness = 0.58
+    contrast = 1.08
+    vibrancy = 0.14
+    vibrancy_darkness = 0.12
+}
+
+shape {
+    monitor =
+    size = 100%, 100%
+    color = rgba(02061152)
+    position = 0, 0
+    halign = center
+    valign = center
+    zindex = 0
+}
+
+label {
+    monitor =
+    text = $TIME
+    color = $text
+    font_size = 92
+    font_family = Rajdhani Light
+    position = 0, 255
+    halign = center
+    valign = center
+    zindex = 2
+}
+
+label {
+    monitor =
+    text = cmd[update:60000] date '+%A, %-d %B'
+    color = $muted
+    font_size = 20
+    font_family = Rajdhani Medium
+    position = 0, 184
+    halign = center
+    valign = center
+    zindex = 2
+}
+
+image {
+    monitor =
+    path = @HOLONIGHT_HYPRLOCK_DATA_DIR@/no-avatar.png
+    size = 142
+    rounding = -1
+    border_size = 3
+    border_color = $cyan $violet 45deg
+    position = 0, 54
+    halign = center
+    valign = center
+    zindex = 1
+}
+
+image {
+    monitor =
+    path = /var/lib/AccountsService/icons/$USER
+    size = 136
+    rounding = -1
+    border_size = 0
+    position = 0, 54
+    halign = center
+    valign = center
+    zindex = 2
+}
+
+label {
+    monitor =
+    text = cmd[update:0] @HOLONIGHT_HYPRLOCK_HELPER@ user
+    color = $text
+    font_size = 25
+    font_family = Inter Medium
+    position = 0, -48
+    halign = center
+    valign = center
+    zindex = 2
+}
+
+input-field {
+    monitor =
+    size = 308, 50
+    outline_thickness = 2
+    dots_size = 0.18
+    dots_spacing = 0.22
+    dots_center = true
+    outer_color = $blue $violet 45deg
+    inner_color = $surfaceSoft
+    font_color = $text
+    font_family = Inter
+    fade_on_empty = false
+    placeholder_text = <span foreground="##8fa9cf">   Enter password</span>
+    hide_input = false
+    rounding = 17
+    check_color = $cyan
+    check_text = <span foreground="##67e8f9">Authenticating…</span>
+    fail_color = $red
+    fail_text = <span foreground="##ff5c7a">$FAIL ($ATTEMPTS)</span>
+    capslock_color = $violet
+    position = 0, -108
+    halign = center
+    valign = center
+    zindex = 2
+}
+
+shape {
+    monitor =
+    size = 520, 48
+    color = $surface
+    border_size = 1
+    border_color = rgba(31558b99)
+    rounding = -1
+    position = 0, 42
+    halign = center
+    valign = bottom
+    zindex = 1
+}
+
+label {
+    monitor =
+    text = cmd[update:5000] @HOLONIGHT_HYPRLOCK_HELPER@ wifi
+    color = $cyan
+    font_size = 19
+    font_family = JetBrainsMono Nerd Font
+    position = -168, 54
+    halign = center
+    valign = bottom
+    zindex = 2
+}
+
+label {
+    monitor =
+    text = cmd[update:1000] @HOLONIGHT_HYPRLOCK_HELPER@ volume
+    color = $muted
+    font_size = 18
+    font_family = JetBrainsMono Nerd Font
+    position = -72, 54
+    halign = center
+    valign = bottom
+    zindex = 2
+}
+
+label {
+    monitor =
+    text = $LAYOUT
+    color = $muted
+    font_size = 15
+    font_family = Inter Medium
+    position = 35, 55
+    halign = center
+    valign = bottom
+    zindex = 2
+}
+
+label {
+    monitor =
+    text = cmd[update:10000] @HOLONIGHT_HYPRLOCK_HELPER@ battery
+    color = $muted
+    font_size = 17
+    font_family = JetBrainsMono Nerd Font
+    position = 146, 54
+    halign = center
+    valign = bottom
+    zindex = 2
+}
