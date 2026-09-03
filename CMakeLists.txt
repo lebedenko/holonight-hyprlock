@@ -10,7 +10,10 @@ set(HOLONIGHT_HYPRLOCK_HELPER "${CMAKE_INSTALL_PREFIX}/libexec/holonight-hyprloc
 configure_file(config/hyprlock.conf.in hyprlock.conf @ONLY)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hyprlock.conf" DESTINATION "/etc/xdg/hypr")
-install(FILES assets/wallpaper.png assets/no-avatar.png DESTINATION "share/holonight-hyprlock")
+install(FILES
+    assets/wallpaper.png
+    assets/no-avatar.png
+    DESTINATION "share/holonight-hyprlock")
 install(PROGRAMS scripts/status DESTINATION "libexec/holonight-hyprlock")
 install(FILES README.md LICENSE DESTINATION "share/doc/holonight-hyprlock")
 

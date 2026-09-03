@@ -2,7 +2,6 @@
 
 sysfs_root=${HOLONIGHT_HYPRLOCK_SYSFS_ROOT:-/sys/class/power_supply}
 passwd_file=${HOLONIGHT_HYPRLOCK_PASSWD_FILE:-/etc/passwd}
-nmcli_command=${HOLONIGHT_HYPRLOCK_NMCLI:-nmcli}
 wpctl_command=${HOLONIGHT_HYPRLOCK_WPCTL:-wpctl}
 
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -17,23 +16,23 @@ user_name() {
     if [ -n "$name" ]; then printf '%s\n' "$name"; else printf '%s\n' "$login"; fi | pango_escape
 }
 
-wifi_status() {
-    have "$nmcli_command" || return 0
-    if "$nmcli_command" -t -f TYPE,STATE device status 2>/dev/null | awk -F: '$1 == "wifi" && $2 == "connected" { found=1 } END { exit !found }'; then
-        printf '󰤨\n'
-    else
-        printf '󰤭\n'
-    fi
-}
-
 volume_status() {
     have "$wpctl_command" || return 0
     output=$("$wpctl_command" get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null) || return 0
-    case $output in *MUTED*) printf '󰖁\n'; return 0 ;; esac
-    value=$(printf '%s\n' "$output" | awk '{ print $2 }')
-    percent=$(awk -v value="$value" 'BEGIN { printf "%d", (value * 100) + 0.5 }' 2>/dev/null) || return 0
+    value=$(printf '%s\n' "$output" | awk '$1 == "Volume:" && $2 ~ /^[0-9]+([.][0-9]+)?$/ { print $2; exit }')
+    [ -n "$value" ] || return 0
+    percent=$(awk -v value="$value" 'BEGIN { printf "%d", (value * 100) + 0.5 }')
     case $percent in ''|*[!0-9]*) return 0 ;; esac
-    if [ "$percent" -le 33 ]; then icon='󰕿'; elif [ "$percent" -le 66 ]; then icon='󰖀'; else icon='󰕾'; fi
+    case $output in
+        *MUTED*) icon='󰝟' ;;
+        *)
+            if [ "$percent" -ge 67 ]; then icon='󰕾'
+            elif [ "$percent" -ge 34 ]; then icon='󰖀'
+            elif [ "$percent" -gt 0 ]; then icon='󰕿'
+            else icon='󰝟'
+            fi
+            ;;
+    esac
     printf '%s %s%%\n' "$icon" "$percent"
 }
 
@@ -46,12 +45,14 @@ battery_status() {
         [ "$scope" = Device ] && continue
         capacity=$(cat "$battery/capacity" 2>/dev/null)
         case $capacity in ''|*[!0-9]*) continue ;; esac
+        [ "$capacity" -le 100 ] || continue
         status=$(cat "$battery/status" 2>/dev/null)
         if [ "$status" = Charging ]; then icon='󰂄'
         elif [ "$capacity" -le 20 ]; then icon='󰁺'
         elif [ "$capacity" -le 50 ]; then icon='󰁾'
         elif [ "$capacity" -le 80 ]; then icon='󰂀'
-        else icon='󰁹'; fi
+        else icon='󰁹'
+        fi
         printf '%s %s%%\n' "$icon" "$capacity"
         return 0
     done
@@ -59,7 +60,6 @@ battery_status() {
 
 case ${1:-} in
     user) user_name ;;
-    wifi) wifi_status ;;
     volume) volume_status ;;
     battery) battery_status ;;
     *) exit 2 ;;

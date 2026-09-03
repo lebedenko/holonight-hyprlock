@@ -26,8 +26,8 @@ background {
     monitor =
     path = @HOLONIGHT_HYPRLOCK_DATA_DIR@/wallpaper.png
     color = rgba(030816ff)
-    blur_passes = 2
-    blur_size = 4
+    blur_passes = 0
+    blur_size = 0
     brightness = 0.58
     contrast = 1.08
     vibrancy = 0.14
@@ -59,7 +59,7 @@ label {
 label {
     monitor =
     text = cmd[update:60000] date '+%A, %-d %B'
-    color = $muted
+    color = $blue
     font_size = 20
     font_family = Rajdhani Medium
     position = 0, 184
@@ -133,12 +133,12 @@ input-field {
 
 shape {
     monitor =
-    size = 520, 48
-    color = $surface
+    size = 560, 68
+    color = rgba(080f20d1)
     border_size = 1
-    border_color = rgba(31558b99)
-    rounding = -1
-    position = 0, 42
+    border_color = rgba(67e8f933)
+    rounding = 16
+    position = 0, 38
     halign = center
     valign = bottom
     zindex = 1
@@ -146,11 +146,11 @@ shape {
 
 label {
     monitor =
-    text = cmd[update:5000] @HOLONIGHT_HYPRLOCK_HELPER@ wifi
-    color = $cyan
-    font_size = 19
+    text =  
+    color = $muted
+    font_size = 25
     font_family = JetBrainsMono Nerd Font
-    position = -168, 54
+    position = -215, 58
     halign = center
     valign = bottom
     zindex = 2
@@ -160,9 +160,9 @@ label {
     monitor =
     text = cmd[update:1000] @HOLONIGHT_HYPRLOCK_HELPER@ volume
     color = $muted
-    font_size = 18
+    font_size = 21
     font_family = JetBrainsMono Nerd Font
-    position = -72, 54
+    position = -90, 58
     halign = center
     valign = bottom
     zindex = 2
@@ -170,11 +170,11 @@ label {
 
 label {
     monitor =
-    text = $LAYOUT
+    text = $LAYOUT[EN,UA]
     color = $muted
-    font_size = 15
-    font_family = Inter Medium
-    position = 35, 55
+    font_size = 21
+    font_family = Inter
+    position = 70, 58
     halign = center
     valign = bottom
     zindex = 2
@@ -182,11 +182,11 @@ label {
 
 label {
     monitor =
-    text = cmd[update:10000] @HOLONIGHT_HYPRLOCK_HELPER@ battery
+    text = cmd[update:5000] @HOLONIGHT_HYPRLOCK_HELPER@ battery
     color = $muted
-    font_size = 17
+    font_size = 21
     font_family = JetBrainsMono Nerd Font
-    position = 146, 54
+    position = 205, 58
     halign = center
     valign = bottom
     zindex = 2
