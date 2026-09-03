@@ -20,6 +20,17 @@ The package installs `/etc/xdg/hypr/hyprlock.conf`, `/usr/libexec/holonight-hypr
 `/usr/share/holonight-hyprlock`. Run `hyprlock` normally; PAM remains responsible for authentication. An existing
 `~/.config/hypr/hyprlock.conf` takes precedence over the system fallback.
 
+The common workflows are also available through [Task](https://taskfile.dev/):
+
+```sh
+task install
+task test
+```
+
+`task install` builds and installs the production configuration to `/usr` using `sudo`. `task test` runs the
+automated suite and then launches hyprlock inside a nested Hyprland window. The nested compositor isolates the lock
+from the host session; unlock normally or close its window to finish the test.
+
 ## Customization
 
 Copy the installed configuration to `~/.config/hypr/hyprlock.conf` before changing colors, positions, or assets.

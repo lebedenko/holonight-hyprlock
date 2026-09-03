@@ -1,0 +1,28 @@
+version: "3"
+
+vars:
+  BUILD_DIR: build
+  INSTALL_BUILD_DIR: build-install
+
+tasks:
+  install:
+    desc: Configure and install the production theme to /usr
+    cmds:
+      - cmake -S . -B {{.INSTALL_BUILD_DIR}} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr
+      - cmake --build {{.INSTALL_BUILD_DIR}}
+      - sudo cmake --install {{.INSTALL_BUILD_DIR}}
+
+  test:
+    desc: Run automated checks, then preview hyprlock in a nested Hyprland session
+    preconditions:
+      - sh: command -v Hyprland >/dev/null 2>&1
+        msg: Hyprland is required for the nested visual test
+      - sh: command -v hyprlock >/dev/null 2>&1
+        msg: hyprlock is required for the nested visual test
+      - sh: test -n "${WAYLAND_DISPLAY:-}"
+        msg: The nested visual test must be started from a Wayland session
+    cmds:
+      - cmake -S . -B {{.BUILD_DIR}} -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=/usr
+      - cmake --build {{.BUILD_DIR}}
+      - ctest --test-dir {{.BUILD_DIR}} --output-on-failure
+      - scripts/run-nested-test.sh
