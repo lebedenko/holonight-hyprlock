@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 project(holonight-hyprlock VERSION 0.1.0 LANGUAGES NONE)
 
 include(CTest)
+include(GNUInstallDirs)
+
+install(FILES LICENSE ASSET_PROVENANCE.md LICENSES/GPL-3.0-or-later.txt
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/licenses/${PROJECT_NAME}")
 
 set(HOLONIGHT_HYPRLOCK_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/holonight-hyprlock"
     CACHE PATH "Absolute runtime asset directory")

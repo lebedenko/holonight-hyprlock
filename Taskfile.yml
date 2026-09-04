@@ -5,6 +5,10 @@ vars:
   INSTALL_BUILD_DIR: build-install
 
 tasks:
+  license-check:
+    desc: Validate REUSE licensing metadata
+    cmds: [reuse lint]
+
   install:
     desc: Configure and install the production theme to /usr
     cmds:
