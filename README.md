@@ -44,3 +44,8 @@ project (`qml/images/no-avatar.png`) and retains compatible provenance. Status i
 does not install raster assets for them.
 
 Code, configuration, documentation, and bundled assets are licensed under GPL-3.0-or-later. See `LICENSE`.
+
+## Standalone developer tooling
+
+See [tooling/README.md](tooling/README.md) for presets, local dependency overrides, editor refresh,
+`task tooling:doctor`, and the independent Serena project.

@@ -1,0 +1,11 @@
+{
+  "module": "holonight-hyprlock",
+  "cpp": false,
+  "qml": false,
+  "languages": [
+    "bash"
+  ],
+  "dependencies": [],
+  "qml_modules": [],
+  "wayland": false
+}

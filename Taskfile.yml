@@ -1,32 +1,85 @@
-version: "3"
-
+version: '3'
 vars:
-  BUILD_DIR: build
-  INSTALL_BUILD_DIR: build-install
-
+  BUILD_DIR: build/debug
+  INSTALL_BUILD_DIR: build/release
+  PRESET: '{{default "debug" .PRESET}}'
 tasks:
   license-check:
     desc: Validate REUSE licensing metadata
-    cmds: [reuse lint]
-
+    cmds:
+    - reuse lint
   install:
     desc: Configure and install the production theme to /usr
     cmds:
-      - cmake -S . -B {{.INSTALL_BUILD_DIR}} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr
-      - cmake --build {{.INSTALL_BUILD_DIR}}
-      - sudo cmake --install {{.INSTALL_BUILD_DIR}}
-
+    - cmake -S . -B {{.INSTALL_BUILD_DIR}} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr
+    - cmake --build {{.INSTALL_BUILD_DIR}}
+    - sudo cmake --install {{.INSTALL_BUILD_DIR}}
   test:
     desc: Run automated checks, then preview hyprlock in a nested Hyprland session
     preconditions:
-      - sh: command -v Hyprland >/dev/null 2>&1
-        msg: Hyprland is required for the nested visual test
-      - sh: command -v hyprlock >/dev/null 2>&1
-        msg: hyprlock is required for the nested visual test
-      - sh: test -n "${WAYLAND_DISPLAY:-}"
-        msg: The nested visual test must be started from a Wayland session
+    - sh: command -v Hyprland >/dev/null 2>&1
+      msg: Hyprland is required for the nested visual test
+    - sh: command -v hyprlock >/dev/null 2>&1
+      msg: hyprlock is required for the nested visual test
+    - sh: test -n "${WAYLAND_DISPLAY:-}"
+      msg: The nested visual test must be started from a Wayland session
     cmds:
-      - cmake -S . -B {{.BUILD_DIR}} -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=/usr
-      - cmake --build {{.BUILD_DIR}}
-      - ctest --test-dir {{.BUILD_DIR}} --output-on-failure
-      - scripts/run-nested-test.sh
+    - task: test:auto
+    - scripts/run-nested-test.sh
+  tooling:doctor:
+    desc: doctor using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py doctor
+  tooling:refresh:
+    desc: refresh using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py refresh --preset {{default "test" .EDITOR_PRESET}}
+  serena:serve:
+    desc: Start independent Serena server in codex context
+    cmds:
+    - serena start-mcp-server --project "{{.TASKFILE_DIR}}" --context codex
+  serena:index:
+    desc: Explicitly index this module
+    cmds:
+    - serena project index "{{.TASKFILE_DIR}}"
+  deps:
+    desc: deps using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py deps --preset {{.PRESET}}
+  configure:
+    desc: configure using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py configure --preset {{.PRESET}}
+  build:
+    desc: build using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py build --preset {{.PRESET}}
+  configure-tests:
+    desc: configure using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py configure --preset test
+  configure:release:
+    desc: configure using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py configure --preset release
+  build:release:
+    desc: build using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py build --preset release
+  lint:
+    desc: Run applicable static checks
+    cmds:
+    - sh -n scripts/status
+  check:
+    desc: Run build, tests and static checks
+    cmds:
+    - task: test
+    - task: lint
+  test:nested:
+    desc: Alias for original nested visual acceptance
+    cmds:
+    - task: test
+  test:auto:
+    desc: test using standalone tooling
+    cmds:
+    - python3 tooling/workflow.py test --preset {{.PRESET}}
