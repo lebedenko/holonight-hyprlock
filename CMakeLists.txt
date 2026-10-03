@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 project(holonight-hyprlock VERSION 0.1.0 LANGUAGES NONE)
 
 include(CTest)
+# This asset-only package has no target architecture for libdir inference.
+set(CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "Installation library directory")
 include(GNUInstallDirs)
 
 install(FILES LICENSE ASSET_PROVENANCE.md LICENSES/GPL-3.0-or-later.txt

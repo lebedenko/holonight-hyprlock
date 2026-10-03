@@ -4,6 +4,10 @@ vars:
   INSTALL_BUILD_DIR: build/release
   PRESET: '{{default "debug" .PRESET}}'
 tasks:
+  ci:
+    desc: Rehearse push build, package and licensing checks in isolated containers
+    cmds:
+    - python3 scripts/ci/run.py
   license-check:
     desc: Validate REUSE licensing metadata
     cmds:

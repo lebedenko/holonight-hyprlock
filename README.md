@@ -49,3 +49,22 @@ Code, configuration, documentation, and bundled assets are licensed under GPL-3.
 
 See [tooling/README.md](tooling/README.md) for presets, local dependency overrides, editor refresh,
 `task tooling:doctor`, and the independent Serena project.
+
+
+## Local CI rehearsal
+
+Run `task ci` with Git, Python 3, Task and an accessible Docker daemon; Podman is
+used when Docker is absent. Immutable linux/amd64 images require an amd64 host or
+emulation and registry access. Local/hosted CI share automated Debug/Ninja build,
+status-helper, staged-package and shell syntax checks, plus REUSE 6.2.0 licensing.
+The nested visual tasks remain separate and require a desktop session.
+
+Tracked edits and non-ignored new inputs enter read-only snapshots; add reported
+new files before pushing. Every lane has a disposable writable copy and fresh
+build tree. Normal development builds stay untouched, and packaging tests use a
+private DESTDIR. Complete logs, source revision/dirty state, tool versions, image
+identities and lane results are stored beneath ignored `build/ci/`. Failed or
+unavailable checks return nonzero and print complete logs. Container layers may
+be cached; application builds are fresh. Run launcher regressions with
+`python3 scripts/ci/test_launcher.py`. No host installation, release or upload
+happens locally.
