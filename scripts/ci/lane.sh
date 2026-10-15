@@ -17,9 +17,22 @@ git --version
 cmake --version
 ninja --version
 file --version
+task --version
+reuse --version
+c++ --version
+pkg-config --version
+pacman --config /dev/null -Q
 python3 scripts/ci/test_launcher.py
-sh -n scripts/status scripts/run-nested-test.sh tests/test-status.sh tests/test-package.sh
-cmake -S . -B build/verification -G Ninja -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTING=ON
-cmake --build build/verification --parallel 2
-ctest --test-dir build/verification --output-on-failure --no-tests=error
+python3 scripts/ci/test_dependencies.py
+for script in scripts/status scripts/run-nested-test.sh scripts/ci/lane.sh tests/test-status.sh tests/test-package.sh; do
+  sh -n "$script"
+done
+task deps PRESET=test
+task configure PRESET=test
+task build PRESET=test
+task test:auto PRESET=test
+cat build/test/Testing/Temporary/LastTest.log
+task configure PRESET=release
+task build PRESET=release
+# Explicit Release/tests-OFF staging uses the same package assertions as CTest.
+sh tests/test-package.sh cmake "$PWD" Release

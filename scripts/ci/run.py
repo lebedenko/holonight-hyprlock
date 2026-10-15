@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import json
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -68,13 +69,21 @@ def main():
                 account_options = ['--mount', f'type=bind,src={passwd},dst=/etc/passwd,readonly',
                                    '--mount', f'type=bind,src={group},dst=/etc/group,readonly']
             report['untracked_inputs'] = snapshot(source)
+            report['source_sha256'] = {str(p.relative_to(source)): hashlib.sha256(
+                os.fsencode(os.readlink(p)) if p.is_symlink() else p.read_bytes()).hexdigest()
+                for p in sorted(source.rglob('*')) if p.is_file() or p.is_symlink()}
             if report['untracked_inputs']:
                 print('Untracked inputs included; add before pushing:')
                 for name in report['untracked_inputs']:
                     print(f'  {name!r}')
             for lane in args.lane or LANES:
                 image = images['licensing' if lane == 'licensing' else 'build']
-                command = [runtime, 'run', '--rm', '--platform', report['platform'], '--user', f'{os.getuid()}:{os.getgid()}',
+                with (output / f'{lane}-pull.log').open('w') as log:
+                    subprocess.run([runtime, 'pull', '--platform', report['platform'], image],
+                                   stdout=log, stderr=subprocess.STDOUT, check=True)
+                identity = subprocess.check_output([runtime, 'image', 'inspect', image], text=True)
+                (output / f'{lane}-image.json').write_text(identity)
+                command = [runtime, 'run', '--rm', '--pull=never', '--network=none', '--platform', report['platform'], '--user', f'{os.getuid()}:{os.getgid()}',
                            '--mount', f'type=bind,src={source},dst=/input,readonly',
                            '--tmpfs', '/work:rw,exec,mode=1777', '--workdir', '/work',
                            '--entrypoint', '/bin/sh', image, '/input/scripts/ci/lane.sh', lane]

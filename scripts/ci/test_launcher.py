@@ -62,6 +62,8 @@ class LauncherTests(unittest.TestCase):
         arguments = Path(self.temporary.name) / 'podman-arguments.json'
         runtime.write_text('#!/usr/bin/env python3\nimport json, sys\nfrom pathlib import Path\n'
                            'if sys.argv[1] == "--version": print("fake-podman")\n'
+                           'elif sys.argv[1] == "image": print("[]")\n'
+                           'elif sys.argv[1] == "pull": pass\n'
                            'else:\n'
                            ' accounts = {}\n'
                            ' for argument in sys.argv[1:]:\n'
@@ -77,6 +79,8 @@ class LauncherTests(unittest.TestCase):
              patch('sys.argv', ['ci', '--lane', launcher.LANES[0]]):
             self.assertEqual(launcher.main(), 0)
         command, accounts = json.loads(arguments.read_text())
+        self.assertIn('--pull=never', command)
+        self.assertIn('--network=none', command)
         self.assertIn('--userns=keep-id', command)
         self.assertEqual(command[command.index('--user') + 1], '1000:1000')
         self.assertTrue(command[command.index('--mount') + 1].endswith(',dst=/input,readonly'))
@@ -89,12 +93,27 @@ class LauncherTests(unittest.TestCase):
         result = json.loads(next((self.root / 'build/ci').glob('*/results.json')).read_text())
         self.assertIn('Neither Docker nor Podman', result['error'])
 
+    def test_acquisition_failure_prevents_container_execution(self):
+        scripts = self.root / 'scripts/ci'
+        scripts.mkdir(parents=True)
+        (scripts / 'images.json').write_text('{"build":"build@sha256:fixture"}')
+        runtime = Path(self.temporary.name) / 'docker'
+        runtime.write_text('#!/bin/sh\nif [ "$1" = --version ]; then echo fake; exit 0; fi\n'
+                           'if [ "$1" = pull ]; then exit 19; fi\nexit 99\n')
+        runtime.chmod(0o755)
+        with patch.object(launcher.shutil, 'which', return_value=str(runtime)), \
+             patch('sys.argv', ['ci', '--lane', 'build-test']):
+            self.assertEqual(launcher.main(), 1)
+        result = json.loads(next((self.root / 'build/ci').glob('*/results.json')).read_text())
+        self.assertEqual(result['lanes'], {})
+        self.assertIn('19', result['error'])
+
     def test_every_failed_lane_fails_task_and_remaining_lanes_run(self):
         scripts = self.root / 'scripts/ci'
         scripts.mkdir(parents=True)
         (scripts / 'images.json').write_text('{"build":"build@sha256:fixture","licensing":"reuse@sha256:fixture"}')
         runtime = Path(self.temporary.name) / 'docker'
-        runtime.write_text('#!/bin/sh\nif [ "$1" = --version ]; then echo fake-runtime; exit 0; fi\nexit 17\n')
+        runtime.write_text('#!/bin/sh\nif [ "$1" = --version ]; then echo fake-runtime; exit 0; fi\nif [ "$1" = pull ]; then exit 0; fi\nif [ "$1" = image ]; then echo "[]"; exit 0; fi\nexit 17\n')
         runtime.chmod(0o755)
         with patch.object(launcher.shutil, 'which', return_value=str(runtime)), patch('sys.argv', ['ci']):
             self.assertEqual(launcher.main(), 1)

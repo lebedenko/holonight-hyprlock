@@ -3,13 +3,14 @@ set -eu
 
 cmake_command=$1
 source_dir=$2
+build_type=${3:-Debug}
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT HUP INT TERM
 build_dir="$stage/build"
 destdir="$stage/dest"
 
-"$cmake_command" -S "$source_dir" -B "$build_dir" -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr >/dev/null
-DESTDIR="$destdir" "$cmake_command" --install "$build_dir" >/dev/null
+"$cmake_command" -S "$source_dir" -B "$build_dir" -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE="$build_type" -DCMAKE_INSTALL_PREFIX=/usr
+DESTDIR="$destdir" "$cmake_command" --install "$build_dir"
 
 for path in etc/xdg/hypr/hyprlock.conf usr/libexec/holonight-hyprlock/status \
     usr/share/holonight-hyprlock/wallpaper.png usr/share/holonight-hyprlock/no-avatar.png \
