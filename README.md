@@ -1,5 +1,7 @@
 # HoloNight Hyprlock
 
+For current build, test, container acceptance and provider workflows, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
 A self-contained system fallback theme for hyprlock 0.9.6 and newer. It uses the fixed HoloNight dark blue palette,
 PAM authentication, a bundled wallpaper, and read-only system indicators.
 
@@ -44,49 +46,3 @@ project (`qml/images/no-avatar.png`) and retains compatible provenance. Status i
 does not install raster assets for them.
 
 Code, configuration, documentation, and bundled assets are licensed under GPL-3.0-or-later. See `LICENSE`.
-
-## Standalone developer tooling
-
-Prepare installed prerequisites explicitly with your distribution package manager:
-C/C++ compiler, CMake, Ninja, pkg-config, Git, Python >=3.10, Task, REUSE, and
-`file` for package tests. Arch package names are `gcc cmake ninja pkgconf git python
-go-task reuse file`. No Qt or GTest is required. Production CMake uses `LANGUAGES NONE`;
-the shared workflow uses the compiler identity for cache compatibility.
-
-```sh
-task deps PRESET=test
-task configure PRESET=test
-task build PRESET=test
-task test:auto PRESET=test
-```
-
-`task deps` validates build/tool prerequisites without installing packages or
-preparing providers (this module has none). The test preset additionally checks
-`file` during configure/build/test. Normal workflows never acquire dependencies.
-Use `task test:auto PRESET=test` for automated checks; the existing `task test`
-and `task test:nested` commands retain their manual nested preview behavior.
-
-See [tooling/README.md](tooling/README.md) for presets, local dependency overrides, editor refresh,
-`task tooling:doctor`, and the independent Serena project.
-
-
-## Local CI rehearsal
-
-Run `task ci` with Git, Python 3, Task and an accessible Docker daemon; Podman is
-used when Docker is absent. Immutable linux/amd64 images require an amd64 host or
-emulation and registry access for explicit image pulls and identity inspection.
-Acceptance then runs with `--pull=never --network=none`, using the qualified
-Arch full dependency image and the existing pinned REUSE image. Local/hosted CI
-share Task dependency/configure/build/test workflows, automated Debug/Ninja build,
-status-helper, Release/tests-OFF staged-package and shell syntax checks, plus REUSE 6.2.0 licensing.
-The nested visual tasks remain separate and require a desktop session.
-
-Tracked edits and non-ignored new inputs enter read-only snapshots; add reported
-new files before pushing. Every lane has a disposable writable copy and fresh
-build tree. Normal development builds stay untouched, and packaging tests use a
-private DESTDIR. Complete logs, per-file source SHA-256 hashes, source revision/dirty state, tool versions, image
-identities and lane results are stored beneath ignored `build/ci/`. Failed or
-unavailable checks return nonzero and print complete logs. Container layers may
-be cached; application builds are fresh. Run launcher regressions with
-`python3 scripts/ci/test_launcher.py`. No host installation, release or upload
-happens locally.
